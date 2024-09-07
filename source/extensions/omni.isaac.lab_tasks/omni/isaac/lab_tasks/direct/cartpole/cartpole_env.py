@@ -66,6 +66,7 @@ class CartpoleEnv(DirectRLEnv):
 
         self.joint_pos = self.cartpole.data.joint_pos
         self.joint_vel = self.cartpole.data.joint_vel
+        self.last_dones = torch.ones(self.cfg.scene.num_envs, device=self.cfg.sim.device)
 
     def _setup_scene(self):
         self.cartpole = Articulation(self.cfg.robot_cfg)
@@ -121,6 +122,7 @@ class CartpoleEnv(DirectRLEnv):
         time_out = self.episode_length_buf >= self.max_episode_length - 1
         out_of_bounds = torch.any(torch.abs(self.joint_pos[:, self._cart_dof_idx]) > self.cfg.max_cart_pos, dim=1)
         out_of_bounds = out_of_bounds | torch.any(torch.abs(self.joint_pos[:, self._pole_dof_idx]) > math.pi / 2, dim=1)
+        self.last_dones = out_of_bounds
         return out_of_bounds, time_out
 
     def _reset_idx(self, env_ids: Sequence[int] | None):
