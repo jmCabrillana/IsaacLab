@@ -13,6 +13,7 @@ from . import agents
 from .cartpole_camera_env import CartpoleCameraEnv, CartpoleDepthCameraEnvCfg, CartpoleRGBCameraEnvCfg
 from .cartpole_env import CartpoleEnv, CartpoleEnvCfg
 from .cartpole_mem_env import CartpoleMemEnv, CartpoleMemEnvCfg
+from .cartpole_cam_env import CartpoleCamEnv, CartpoleCamEnvCfg
 
 ##
 # Register Gym environments.
@@ -37,6 +38,15 @@ gym.register(
     disable_env_checker=True,
     kwargs={
         "env_cfg_entry_point": CartpoleMemEnvCfg,
+    },
+)
+
+gym.register(
+    id="Isaac-Cartpole-Direct-Cam-v0",
+    entry_point="omni.isaac.lab_tasks.direct.cartpole:CartpoleCamEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": CartpoleCamEnvCfg,
     },
 )
 
