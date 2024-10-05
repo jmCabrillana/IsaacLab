@@ -13,7 +13,7 @@ from omni.isaac.lab_assets.cartpole import CARTPOLE_CFG
 
 import omni.isaac.lab.sim as sim_utils
 from omni.isaac.lab.assets import Articulation, ArticulationCfg
-from omni.isaac.lab.envs import DirectRLEnv, DirectRLEnvCfg
+from omni.isaac.lab.envs import DirectRLEnv, DirectRLEnvCfg, ViewerCfg
 from omni.isaac.lab.scene import InteractiveSceneCfg
 from omni.isaac.lab.sim import SimulationCfg
 from omni.isaac.lab.sim.spawners.from_files import GroundPlaneCfg, spawn_ground_plane
@@ -41,6 +41,9 @@ class CartpoleCamEnvCfg(DirectRLEnvCfg):
     cart_dof_name = "slider_to_cart"
     pole_dof_name = "cart_to_pole"
 
+    # change viewer settings
+    viewer = ViewerCfg(eye=(20.0, 20.0, 20.0))
+
     # scene
     scene: InteractiveSceneCfg = InteractiveSceneCfg(num_envs=4096, env_spacing=4.0, replicate_physics=True)
 
@@ -63,8 +66,8 @@ class CartpoleCamEnvCfg(DirectRLEnvCfg):
         spawn=sim_utils.PinholeCameraCfg(
             focal_length=24.0, focus_distance=400.0, horizontal_aperture=20.955, clipping_range=(0.1, 20.0)
         ),
-        width=80,
-        height=80,
+        width=448,
+        height=256,
     )
 
 
@@ -114,10 +117,6 @@ class CartpoleCamEnv(DirectRLEnv):
             dim=-1,
         )
         camera_output = self._tiled_camera.data.output['rgb'].clone()
-        for cam in camera_output:
-            print("camera count ", cam.count_nonzero())
-            print("camera: ", cam.shape)
-            print(cam)
         observations = {"policy": obs,
                          "camera": camera_output}
         return observations
