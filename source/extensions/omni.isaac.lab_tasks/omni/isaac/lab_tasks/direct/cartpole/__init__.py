@@ -47,6 +47,7 @@ gym.register(
     disable_env_checker=True,
     kwargs={
         "env_cfg_entry_point": CartpoleCamEnvCfg,
+        "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml"
     },
 )
 
