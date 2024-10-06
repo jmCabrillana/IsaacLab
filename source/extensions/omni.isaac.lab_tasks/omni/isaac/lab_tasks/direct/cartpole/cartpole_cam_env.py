@@ -20,8 +20,10 @@ from omni.isaac.lab.sim.spawners.from_files import GroundPlaneCfg, spawn_ground_
 from omni.isaac.lab.utils import configclass
 from omni.isaac.lab.utils.math import sample_uniform
 from omni.isaac.lab.sensors import TiledCamera, TiledCameraCfg, save_images_to_file
+from infinigen.tools.isaac_sim import InfinigenIsaacScene, InfinigenIsaacSceneCFG
 
-import torchshow as ts
+sc = InfinigenIsaacScene(InfinigenIsaacSceneCFG)
+sc._add_infinigen_scene()
 
 @configclass
 class CartpoleCamEnvCfg(DirectRLEnvCfg):
@@ -60,7 +62,7 @@ class CartpoleCamEnvCfg(DirectRLEnvCfg):
 
     # camera
     tiled_camera: TiledCameraCfg = TiledCameraCfg(
-        prim_path="/World/envs/env_.*/Camera",
+        prim_path="/World/envs/env_.*/Robot",
         offset=TiledCameraCfg.OffsetCfg(pos=(-7.0, 0.0, 3.0), rot=(0.9945, 0.0, 0.1045, 0.0), convention="world"),
         data_types=["rgb"],
         spawn=sim_utils.PinholeCameraCfg(

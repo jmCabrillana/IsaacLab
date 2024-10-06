@@ -14,10 +14,12 @@ from omni.isaac.lab.utils.assets import ISAACLAB_NUCLEUS_DIR
 ##
 # Configuration
 ##
-
+usd_path=f"{ISAACLAB_NUCLEUS_DIR}/Robots/Classic/Cartpole/cartpole.usd"
+print(f'$$$$$$$$$$$$$$$$ {usd_path}')
 CARTPOLE_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
         usd_path=f"{ISAACLAB_NUCLEUS_DIR}/Robots/Classic/Cartpole/cartpole.usd",
+        
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             rigid_body_enabled=True,
             max_linear_velocity=1000.0,
