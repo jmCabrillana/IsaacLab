@@ -22,9 +22,6 @@ from omni.isaac.lab.utils.math import sample_uniform
 from omni.isaac.lab.sensors import TiledCamera, TiledCameraCfg, save_images_to_file
 from infinigen.tools.isaac_sim import InfinigenIsaacScene, InfinigenIsaacSceneCFG
 
-sc = InfinigenIsaacScene(InfinigenIsaacSceneCFG)
-sc._add_infinigen_scene()
-
 @configclass
 class CartpoleCamEnvCfg(DirectRLEnvCfg):
     # env
@@ -62,8 +59,8 @@ class CartpoleCamEnvCfg(DirectRLEnvCfg):
 
     # camera
     tiled_camera: TiledCameraCfg = TiledCameraCfg(
-        prim_path="/World/envs/env_.*/Robot",
-        offset=TiledCameraCfg.OffsetCfg(pos=(-7.0, 0.0, 3.0), rot=(0.9945, 0.0, 0.1045, 0.0), convention="world"),
+        prim_path="/World/envs/env_.*/Robot/Camera",
+        offset=TiledCameraCfg.OffsetCfg(pos=(-14.0, 6.0, 3.0), rot=(0.9945, 0.0, 0.1045, 0.0), convention="world"),
         data_types=["rgb"],
         spawn=sim_utils.PinholeCameraCfg(
             focal_length=24.0, focus_distance=400.0, horizontal_aperture=20.955, clipping_range=(0.1, 20.0)
@@ -71,6 +68,8 @@ class CartpoleCamEnvCfg(DirectRLEnvCfg):
         width=448,
         height=256,
     )
+
+    # infinigen
 
 
 class CartpoleCamEnv(DirectRLEnv):
@@ -88,10 +87,15 @@ class CartpoleCamEnv(DirectRLEnv):
         self.last_dones = torch.ones(self.cfg.scene.num_envs, device=self.cfg.sim.device)
 
     def _setup_scene(self):
+        # Robots
         self.cartpole = Articulation(self.cfg.robot_cfg)
         self._tiled_camera = TiledCamera(self.cfg.tiled_camera)
         # add ground plane
         spawn_ground_plane(prim_path="/World/ground", cfg=GroundPlaneCfg())
+        #infinigen
+        infinigen = InfinigenIsaacScene(InfinigenIsaacSceneCFG)
+        infinigen._add_infinigen_scene()
+        sim_utils.UsdFileCfg
         # clone, filter, and replicate
         self.scene.clone_environments(copy_from_source=False)
         self.scene.filter_collisions(global_prim_paths=[])
@@ -99,7 +103,7 @@ class CartpoleCamEnv(DirectRLEnv):
         self.scene.articulations["cartpole"] = self.cartpole
         self.scene.sensors["tiled_camera"] = self._tiled_camera
         # add lights
-        light_cfg = sim_utils.DomeLightCfg(intensity=2000.0, color=(0.75, 0.75, 0.75))
+        light_cfg = sim_utils.DomeLightCfg(intensity=4000.0, color=(0.75, 0.75, 0.75))
         light_cfg.func("/World/Light", light_cfg)
 
     def _pre_physics_step(self, actions: torch.Tensor) -> None:
