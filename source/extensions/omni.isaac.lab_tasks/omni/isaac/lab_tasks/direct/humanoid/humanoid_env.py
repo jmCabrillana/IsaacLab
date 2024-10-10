@@ -9,11 +9,13 @@ from omni.isaac.lab_assets import HUMANOID_CFG
 
 import omni.isaac.lab.sim as sim_utils
 from omni.isaac.lab.assets import ArticulationCfg
-from omni.isaac.lab.envs import DirectRLEnvCfg
+from omni.isaac.lab.envs import DirectRLEnvCfg, ViewerCfg
 from omni.isaac.lab.scene import InteractiveSceneCfg
-from omni.isaac.lab.sim import SimulationCfg
+from omni.isaac.lab.sim import SimulationCfg, PhysxCfg
 from omni.isaac.lab.terrains import TerrainImporterCfg
 from omni.isaac.lab.utils import configclass
+from omni.isaac.lab.sensors import TiledCamera, TiledCameraCfg, save_images_to_file
+
 
 from omni.isaac.lab_tasks.direct.locomotion.locomotion_env import LocomotionEnv
 
@@ -29,7 +31,8 @@ class HumanoidEnvCfg(DirectRLEnvCfg):
     num_states = 0
 
     # simulation
-    sim: SimulationCfg = SimulationCfg(dt=1 / 120, render_interval=decimation)
+    sim: SimulationCfg = SimulationCfg(dt=1 / 120, render_interval=decimation, 
+                                       Physx=PhysxCfg(gpu_collision_stack_size=2**26)) # 2**26
     terrain = TerrainImporterCfg(
         prim_path="/World/ground",
         terrain_type="plane",
@@ -82,10 +85,25 @@ class HumanoidEnvCfg(DirectRLEnvCfg):
     dof_vel_scale: float = 0.1
 
     death_cost: float = -1.0
-    termination_height: float = 0.8
+    termination_height: float = -1.0 #0.8
 
     angular_velocity_scale: float = 0.25
     contact_force_scale: float = 0.01
+
+    # change viewer settings
+    viewer = ViewerCfg(eye=(20.0, 20.0, 20.0))
+
+    # camera
+    tiled_camera: TiledCameraCfg =  TiledCameraCfg(
+        prim_path="/World/envs/env_.*/Robot/Camera",
+        offset=TiledCameraCfg.OffsetCfg(pos=(-14.0, 6.0, 3.0), rot=(0.9945, 0.0, 0.1045, 0.0), convention="world"),
+        data_types=["rgb"],
+        spawn=sim_utils.PinholeCameraCfg(
+            focal_length=24.0, focus_distance=400.0, horizontal_aperture=20.955, clipping_range=(0.1, 20.0)
+        ),
+        width=448,
+        height=256,
+    )
 
 
 class HumanoidEnv(LocomotionEnv):

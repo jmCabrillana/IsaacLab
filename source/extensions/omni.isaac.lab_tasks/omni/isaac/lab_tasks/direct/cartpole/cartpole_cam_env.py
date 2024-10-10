@@ -69,8 +69,6 @@ class CartpoleCamEnvCfg(DirectRLEnvCfg):
         height=256,
     )
 
-    # infinigen
-
 
 class CartpoleCamEnv(DirectRLEnv):
     cfg: CartpoleCamEnvCfg
@@ -95,16 +93,17 @@ class CartpoleCamEnv(DirectRLEnv):
         #infinigen
         infinigen = InfinigenIsaacScene(InfinigenIsaacSceneCFG)
         infinigen._add_infinigen_scene()
-        sim_utils.UsdFileCfg
         # clone, filter, and replicate
         self.scene.clone_environments(copy_from_source=False)
         self.scene.filter_collisions(global_prim_paths=[])
         # add articultion to scene
         self.scene.articulations["cartpole"] = self.cartpole
+        # add sensors
         self.scene.sensors["tiled_camera"] = self._tiled_camera
         # add lights
         light_cfg = sim_utils.DomeLightCfg(intensity=4000.0, color=(0.75, 0.75, 0.75))
-        light_cfg.func("/World/Light", light_cfg)
+        # light_cfg = sim_utils.DistantLightCfg(intensity=4000.0, color=(1.0, 0.75, 0.75))
+        light_cfg.func("/World/Light", light_cfg, translation=(0.0, 0.0, 0.0))
 
     def _pre_physics_step(self, actions: torch.Tensor) -> None:
         self.actions = self.action_scale * actions.clone()
