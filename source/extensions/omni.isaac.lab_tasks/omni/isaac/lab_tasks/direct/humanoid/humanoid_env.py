@@ -32,7 +32,7 @@ class HumanoidEnvCfg(DirectRLEnvCfg):
 
     # simulation
     sim: SimulationCfg = SimulationCfg(dt=1 / 120, render_interval=decimation, 
-                                       Physx=PhysxCfg(gpu_collision_stack_size=2**26)) # 2**26
+                                       physx=PhysxCfg(gpu_collision_stack_size=2**26)) # 2**26
     terrain = TerrainImporterCfg(
         prim_path="/World/ground",
         terrain_type="plane",
