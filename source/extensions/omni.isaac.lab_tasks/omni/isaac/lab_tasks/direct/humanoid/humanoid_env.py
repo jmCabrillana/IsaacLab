@@ -85,7 +85,7 @@ class HumanoidEnvCfg(DirectRLEnvCfg):
     dof_vel_scale: float = 0.1
 
     death_cost: float = -1.0
-    termination_height: float = -1.0 #0.8
+    termination_height: float = 0.8 # -0.1 0.8
 
     angular_velocity_scale: float = 0.25
     contact_force_scale: float = 0.01
@@ -95,8 +95,8 @@ class HumanoidEnvCfg(DirectRLEnvCfg):
 
     # camera
     tiled_camera: TiledCameraCfg =  TiledCameraCfg(
-        prim_path="/World/envs/env_.*/Robot/Camera",
-        offset=TiledCameraCfg.OffsetCfg(pos=(-14.0, 6.0, 3.0), rot=(0.9945, 0.0, 0.1045, 0.0), convention="world"),
+        prim_path="/World/envs/env_.*/Robot/head/Camera",
+        offset=TiledCameraCfg.OffsetCfg(pos=(0.3, 0.0, 2.0), rot=(0.9945, 0.0, 0.1045, 0.0), convention="world"),
         data_types=["rgb"],
         spawn=sim_utils.PinholeCameraCfg(
             focal_length=24.0, focus_distance=400.0, horizontal_aperture=20.955, clipping_range=(0.1, 20.0)
