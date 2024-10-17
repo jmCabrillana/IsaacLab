@@ -55,21 +55,23 @@ class LocomotionEnv(DirectRLEnv):
 
     def _setup_scene(self):
         self.robot = Articulation(self.cfg.robot)
-        self._tiled_camera = TiledCamera(self.cfg.tiled_camera)
+        if hasattr(self.cfg, 'tiled_camera'):
+            self._tiled_camera = TiledCamera(self.cfg.tiled_camera)
         #  add ground plane
-        # self.cfg.terrain.num_envs = self.scene.cfg.num_envs
-        # self.cfg.terrain.env_spacing = self.scene.cfg.env_spacing
-        # self.terrain = self.cfg.terrain.class_type(self.cfg.terrain)
+        self.cfg.terrain.num_envs = self.scene.cfg.num_envs
+        self.cfg.terrain.env_spacing = self.scene.cfg.env_spacing
+        self.terrain = self.cfg.terrain.class_type(self.cfg.terrain)
         #infinigen
-        infinigen = InfinigenIsaacScene(InfinigenIsaacSceneCFG)
-        infinigen._add_infinigen_scene()
+        # infinigen = InfinigenIsaacScene(InfinigenIsaacSceneCFG)
+        # infinigen._add_infinigen_scene()
         # clone, filter, and replicate
         self.scene.clone_environments(copy_from_source=False)
         self.scene.filter_collisions(global_prim_paths=[self.cfg.terrain.prim_path])
         # add articultion to scene
         self.scene.articulations["robot"] = self.robot
         # add sensors
-        self.scene.sensors["tiled_camera"] = self._tiled_camera
+        if hasattr(self.cfg, 'tiled_camera'):
+            self.scene.sensors["tiled_camera"] = self._tiled_camera
         # add lights
         light_cfg = sim_utils.DomeLightCfg(intensity=2000.0, color=(0.75, 0.75, 0.75))
         light_cfg.func("/World/Light", light_cfg)
@@ -134,7 +136,10 @@ class LocomotionEnv(DirectRLEnv):
             ),
             dim=-1,
         )
-        camera_output = self._tiled_camera.data.output['rgb'].clone()
+        if hasattr(self.cfg, 'tiled_camera'):
+            camera_output = self._tiled_camera.data.output['rgb'].clone()
+        else:
+            camera_output = None
         observations = {"policy": obs,
                          "camera": camera_output}
         return observations

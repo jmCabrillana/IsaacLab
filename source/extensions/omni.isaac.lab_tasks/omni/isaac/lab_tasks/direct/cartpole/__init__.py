@@ -33,7 +33,7 @@ gym.register(
 )
 
 gym.register(
-    id="Isaac-Cartpole-Direct-Mem-v0",
+    id="Isaac-Cartpole-Mem-Direct-v0",
     entry_point="omni.isaac.lab_tasks.direct.cartpole:CartpoleMemEnv",
     disable_env_checker=True,
     kwargs={
@@ -42,7 +42,7 @@ gym.register(
 )
 
 gym.register(
-    id="Isaac-Cartpole-Direct-Cam-v0",
+    id="Isaac-Cartpole-Cam-Direct-v0",
     entry_point="omni.isaac.lab_tasks.direct.cartpole:CartpoleCamEnv",
     disable_env_checker=True,
     kwargs={

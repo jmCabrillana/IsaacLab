@@ -21,7 +21,7 @@ from omni.isaac.lab_tasks.direct.locomotion.locomotion_env import LocomotionEnv
 
 
 @configclass
-class HumanoidEnvCfg(DirectRLEnvCfg):
+class HumanoidCamEnvCfg(DirectRLEnvCfg):
     # env
     episode_length_s = 15.0
     decimation = 2
@@ -93,9 +93,21 @@ class HumanoidEnvCfg(DirectRLEnvCfg):
     # change viewer settings
     viewer = ViewerCfg(eye=(20.0, 20.0, 20.0))
 
+    # camera
+    tiled_camera: TiledCameraCfg =  TiledCameraCfg(
+        prim_path="/World/envs/env_.*/Robot/head/Camera",
+        offset=TiledCameraCfg.OffsetCfg(pos=(0.3, 0.0, 2.0), rot=(0.9945, 0.0, 0.1045, 0.0), convention="world"),
+        data_types=["rgb"],
+        spawn=sim_utils.PinholeCameraCfg(
+            focal_length=24.0, focus_distance=400.0, horizontal_aperture=20.955, clipping_range=(0.1, 20.0)
+        ),
+        width=448,
+        height=256,
+    )
 
-class HumanoidEnv(LocomotionEnv):
-    cfg: HumanoidEnvCfg
 
-    def __init__(self, cfg: HumanoidEnvCfg, render_mode: str | None = None, **kwargs):
+class HumanoidCamEnv(LocomotionEnv):
+    cfg: HumanoidCamEnvCfg
+
+    def __init__(self, cfg: HumanoidCamEnvCfg, render_mode: str | None = None, **kwargs):
         super().__init__(cfg, render_mode, **kwargs)
