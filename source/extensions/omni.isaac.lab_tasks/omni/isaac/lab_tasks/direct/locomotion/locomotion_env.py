@@ -60,10 +60,10 @@ class LocomotionEnv(DirectRLEnv):
         #  add ground plane
         self.cfg.terrain.num_envs = self.scene.cfg.num_envs
         self.cfg.terrain.env_spacing = self.scene.cfg.env_spacing
-        self.terrain = self.cfg.terrain.class_type(self.cfg.terrain)
+        # self.terrain = self.cfg.terrain.class_type(self.cfg.terrain)
         #infinigen
-        # infinigen = InfinigenIsaacScene(InfinigenIsaacSceneCFG)
-        # infinigen._add_infinigen_scene()
+        infinigen = InfinigenIsaacScene(InfinigenIsaacSceneCFG)
+        infinigen._add_infinigen_scene()
         # clone, filter, and replicate
         self.scene.clone_environments(copy_from_source=False)
         self.scene.filter_collisions(global_prim_paths=[self.cfg.terrain.prim_path])

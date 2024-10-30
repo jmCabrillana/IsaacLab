@@ -68,7 +68,7 @@ agent:
   experiment:
     directory: "humanoid_direct"
     experiment_name: ""
-    write_interval: auto
+    write_interval: 1
     checkpoint_interval: auto
 
 
