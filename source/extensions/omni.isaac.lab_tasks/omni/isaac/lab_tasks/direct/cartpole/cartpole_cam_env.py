@@ -20,7 +20,7 @@ from omni.isaac.lab.sim.spawners.from_files import GroundPlaneCfg, spawn_ground_
 from omni.isaac.lab.utils import configclass
 from omni.isaac.lab.utils.math import sample_uniform
 from omni.isaac.lab.sensors import TiledCamera, TiledCameraCfg, save_images_to_file
-from infinigen.tools.isaac_sim import InfinigenIsaacScene, InfinigenIsaacSceneCFG
+from memoryPerceiver.memory_perceiver.isaac.infinigen_scene import InfinigenIsaacScene, InfinigenIsaacSceneCFG
 
 @configclass
 class CartpoleCamEnvCfg(DirectRLEnvCfg):
