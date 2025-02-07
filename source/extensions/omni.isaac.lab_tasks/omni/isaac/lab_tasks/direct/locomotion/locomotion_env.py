@@ -12,7 +12,13 @@ from omni.isaac.core.utils.torch.rotations import compute_heading_and_up, comput
 
 import omni.isaac.lab.sim as sim_utils
 from omni.isaac.lab.assets import Articulation
-from omni.isaac.lab.envs import DirectRLEnv, DirectRLEnvCfg
+from omni.isaac.lab.envs import DirectRLEnv, DirectRLEnvCfg, ViewerCfg
+from omni.isaac.lab.scene import InteractiveSceneCfg
+from omni.isaac.lab.sim import SimulationCfg
+from omni.isaac.lab.sensors import TiledCamera, TiledCameraCfg, save_images_to_file
+from memoryPerceiver.memory_perceiver.isaac.infinigen_scene import InfinigenIsaacScene, InfinigenIsaacSceneCFG
+from omni.isaac.lab.utils import configclass
+
 
 
 def normalize_angle(x):
@@ -44,18 +50,28 @@ class LocomotionEnv(DirectRLEnv):
         self.inv_start_rot = quat_conjugate(self.start_rotation).repeat((self.num_envs, 1))
         self.basis_vec0 = self.heading_vec.clone()
         self.basis_vec1 = self.up_vec.clone()
+        self.last_dones = torch.ones(self.cfg.scene.num_envs, device=self.cfg.sim.device)
+
 
     def _setup_scene(self):
         self.robot = Articulation(self.cfg.robot)
-        # add ground plane
+        if hasattr(self.cfg, 'tiled_camera'):
+            self._tiled_camera = TiledCamera(self.cfg.tiled_camera)
+        #  add ground plane
         self.cfg.terrain.num_envs = self.scene.cfg.num_envs
         self.cfg.terrain.env_spacing = self.scene.cfg.env_spacing
         self.terrain = self.cfg.terrain.class_type(self.cfg.terrain)
+        #infinigen
+        # infinigen = InfinigenIsaacScene(InfinigenIsaacSceneCFG)
+        # infinigen._add_infinigen_scene()
         # clone, filter, and replicate
         self.scene.clone_environments(copy_from_source=False)
         self.scene.filter_collisions(global_prim_paths=[self.cfg.terrain.prim_path])
         # add articultion to scene
         self.scene.articulations["robot"] = self.robot
+        # add sensors
+        if hasattr(self.cfg, 'tiled_camera'):
+            self.scene.sensors["tiled_camera"] = self._tiled_camera
         # add lights
         light_cfg = sim_utils.DomeLightCfg(intensity=2000.0, color=(0.75, 0.75, 0.75))
         light_cfg.func("/World/Light", light_cfg)
@@ -120,7 +136,12 @@ class LocomotionEnv(DirectRLEnv):
             ),
             dim=-1,
         )
-        observations = {"policy": obs}
+        if hasattr(self.cfg, 'tiled_camera'):
+            camera_output = self._tiled_camera.data.output['rgb'].clone()
+        else:
+            camera_output = None
+        observations = {"policy": obs,
+                         "camera": camera_output}
         return observations
 
     def _get_rewards(self) -> torch.Tensor:
@@ -148,6 +169,7 @@ class LocomotionEnv(DirectRLEnv):
         self._compute_intermediate_values()
         time_out = self.episode_length_buf >= self.max_episode_length - 1
         died = self.torso_position[:, 2] < self.cfg.termination_height
+        self.last_dones = died
         return died, time_out
 
     def _reset_idx(self, env_ids: torch.Tensor | None):
@@ -159,7 +181,7 @@ class LocomotionEnv(DirectRLEnv):
         joint_pos = self.robot.data.default_joint_pos[env_ids]
         joint_vel = self.robot.data.default_joint_vel[env_ids]
         default_root_state = self.robot.data.default_root_state[env_ids]
-        default_root_state[:, :3] += self.scene.env_origins[env_ids]
+        default_root_state[:, :3] = torch.tensor(self.robot.data.root_pos_w)[env_ids] + 0.8 # self.scene.env_origins[env_ids] 
 
         self.robot.write_root_pose_to_sim(default_root_state[:, :7], env_ids)
         self.robot.write_root_velocity_to_sim(default_root_state[:, 7:], env_ids)
