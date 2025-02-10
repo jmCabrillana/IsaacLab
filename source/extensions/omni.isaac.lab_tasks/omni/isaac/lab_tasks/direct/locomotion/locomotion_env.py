@@ -181,7 +181,7 @@ class LocomotionEnv(DirectRLEnv):
         joint_pos = self.robot.data.default_joint_pos[env_ids]
         joint_vel = self.robot.data.default_joint_vel[env_ids]
         default_root_state = self.robot.data.default_root_state[env_ids]
-        default_root_state[:, :3] += self.scene.env_origins[env_ids]
+        default_root_state[:, :3] = torch.tensor(self.robot.data.root_pos_w)[env_ids] + 0.8 # self.scene.env_origins[env_ids] 
 
         self.robot.write_root_pose_to_sim(default_root_state[:, :7], env_ids)
         self.robot.write_root_velocity_to_sim(default_root_state[:, 7:], env_ids)
