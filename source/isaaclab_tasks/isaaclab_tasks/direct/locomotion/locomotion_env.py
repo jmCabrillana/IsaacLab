@@ -13,7 +13,7 @@ from isaacsim.core.utils.torch.rotations import compute_heading_and_up, compute_
 import isaaclab.sim as sim_utils
 from isaaclab.assets import Articulation
 from isaaclab.envs import DirectRLEnv, DirectRLEnvCfg
-from isaac.lab.sensors import TiledCamera
+from isaaclab.sensors import TiledCamera
 from memoryPerceiver.memory_perceiver.isaac.infinigen_scene import InfinigenIsaacScene, InfinigenIsaacSceneCFG
 
 
@@ -54,12 +54,12 @@ class LocomotionEnv(DirectRLEnv):
         if hasattr(self.cfg, 'tiled_camera'):
             self._tiled_camera = TiledCamera(self.cfg.tiled_camera)
         #  add ground plane
-        self.cfg.terrain.num_envs = self.scene.cfg.num_envs
-        self.cfg.terrain.env_spacing = self.scene.cfg.env_spacing
-        self.terrain = self.cfg.terrain.class_type(self.cfg.terrain)
+        # self.cfg.terrain.num_envs = self.scene.cfg.num_envs
+        # self.cfg.terrain.env_spacing = self.scene.cfg.env_spacing
+        # self.terrain = self.cfg.terrain.class_type(self.cfg.terrain)
         #infinigen
-        # infinigen = InfinigenIsaacScene(InfinigenIsaacSceneCFG)
-        # infinigen._add_infinigen_scene()
+        infinigen = InfinigenIsaacScene(InfinigenIsaacSceneCFG)
+        infinigen._add_infinigen_scene()
         # clone, filter, and replicate
         self.scene.clone_environments(copy_from_source=False)
         # add articulation to scene
@@ -176,7 +176,8 @@ class LocomotionEnv(DirectRLEnv):
         joint_pos = self.robot.data.default_joint_pos[env_ids]
         joint_vel = self.robot.data.default_joint_vel[env_ids]
         default_root_state = self.robot.data.default_root_state[env_ids]
-        default_root_state[:, :3] = torch.tensor(self.robot.data.root_pos_w)[env_ids] + 0.8 # self.scene.env_origins[env_ids] 
+        default_root_state[:, :3] = torch.tensor(self.robot.data.root_pos_w)[env_ids] # self.scene.env_origins[env_ids] 
+        default_root_state[:, 2] += 0.8
 
         self.robot.write_root_pose_to_sim(default_root_state[:, :7], env_ids)
         self.robot.write_root_velocity_to_sim(default_root_state[:, 7:], env_ids)

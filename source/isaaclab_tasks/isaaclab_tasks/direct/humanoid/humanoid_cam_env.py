@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from isaac.lab_assets import HUMANOID_CFG
+from isaac.lab.assets import HUMANOID_CFG
 
 import isaac.lab.sim as sim_utils
 from isaac.lab.assets import ArticulationCfg
