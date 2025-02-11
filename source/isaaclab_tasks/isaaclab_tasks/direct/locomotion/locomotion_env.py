@@ -48,18 +48,22 @@ class LocomotionEnv(DirectRLEnv):
         self.basis_vec1 = self.up_vec.clone()
         self.last_dones = torch.ones(self.cfg.scene.num_envs, device=self.cfg.sim.device)
 
+        self.head_index = self.robot.body_names.index("head")
+        self.right_foot_index = self.robot.body_names.index("right_foot")
+        self.left_foot_index = self.robot.body_names.index("left_foot")
+
 
     def _setup_scene(self):
         self.robot = Articulation(self.cfg.robot)
         if hasattr(self.cfg, 'tiled_camera'):
             self._tiled_camera = TiledCamera(self.cfg.tiled_camera)
         #  add ground plane
-        # self.cfg.terrain.num_envs = self.scene.cfg.num_envs
-        # self.cfg.terrain.env_spacing = self.scene.cfg.env_spacing
-        # self.terrain = self.cfg.terrain.class_type(self.cfg.terrain)
+        self.cfg.terrain.num_envs = self.scene.cfg.num_envs
+        self.cfg.terrain.env_spacing = self.scene.cfg.env_spacing
+        self.terrain = self.cfg.terrain.class_type(self.cfg.terrain)
         #infinigen
-        infinigen = InfinigenIsaacScene(InfinigenIsaacSceneCFG)
-        infinigen._add_infinigen_scene()
+        # infinigen = InfinigenIsaacScene(InfinigenIsaacSceneCFG)
+        # infinigen._add_infinigen_scene()
         # clone, filter, and replicate
         self.scene.clone_environments(copy_from_source=False)
         # add articulation to scene
@@ -163,7 +167,11 @@ class LocomotionEnv(DirectRLEnv):
     def _get_dones(self) -> tuple[torch.Tensor, torch.Tensor]:
         self._compute_intermediate_values()
         time_out = self.episode_length_buf >= self.max_episode_length - 1
-        died = self.torso_position[:, 2] < self.cfg.termination_height
+        # died = self.torso_position[:, 2] < self.cfg.termination_height
+        head_pos_z = self.robot.data.body_pos_w[:, self.head_index][:, 2]
+        right_foot_pos_z = self.robot.data.body_pos_w[:, self.right_foot_index][:, 2]
+        left_foot_pos_z = self.robot.data.body_pos_w[:, self.left_foot_index][:, 2]
+        died =  head_pos_z - ( right_foot_pos_z + left_foot_pos_z ) / 2 < self.cfg.termination_height / 2
         self.last_dones = died
         return died, time_out
 
